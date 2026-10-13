@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>VENEK | Calculadora Mercado Livre</title>
+<style>
+:root{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:#30343b;background:#fffbea}
+*{box-sizing:border-box}body{margin:0}.top{background:#ffe600;color:#252525;padding:22px max(18px,calc((100vw - 1000px)/2));} .top h1{margin:0;font-size:23px} .top p{margin:6px 0 0;color:#5c5200;font-size:14px}.wrap{max-width:1120px;margin:22px auto;padding:0 16px 40px}
+header{background:#ffe600;color:#252525;padding:22px 25px;border-radius:16px;margin-bottom:14px}header h1{margin:0;font-size:22px}header small{opacity:.75}
+.panel{background:white;border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 3px 12px #8c78001a}
+h2{font-size:16px;margin:0 0 14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:13px;font-weight:650;margin-bottom:6px}
+input,select{width:100%;border:1px solid #cbd5e1;border-radius:9px;font-size:17px;padding:11px;background:#fff;color:#142b4d}
+input:focus,select:focus{outline:2px solid #ffe600;border-color:#c8a900}
+.field{margin:0 0 14px}.hint{font-size:12px;color:#64748b;line-height:1.5;margin-top:6px}
+.summary{background:#fff7c6;border-radius:12px;padding:16px;text-align:center}.summary .main{font-size:32px;font-weight:800;color:#30343b;margin:5px 0}
+.stat{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #e9eef5;padding:12px 0}.stat:last-child{border:0}
+.good{color:#167342;font-weight:800}.warn{color:#ac4b1c}.big{font-size:24px;font-weight:800}
+button{background:#ffe600;color:#2a2a2a;border:0;border-radius:9px;padding:11px 15px;cursor:pointer;font-weight:700}
+.mode{display:flex;gap:6px;margin-bottom:14px}.mode button{flex:1;background:#f4f4f4;color:#263e5d}.mode button.active{background:#ffe600;color:#242424}
+details{border:1px solid #e3e9f2;border-radius:12px;padding:13px}summary{font-weight:750;cursor:pointer}
+.pill{border:1px solid #e4c800;border-radius:100px;padding:3px 9px;font-size:12px;font-weight:700;display:inline-block}
+.note{font-size:12px;line-height:1.6;color:#536277}
+@media(max-width:460px){.grid{grid-template-columns:1fr}.wrap{margin:12px auto}header{padding:18px}.main{font-size:27px}}
+
+/* Layout reorganizado — sem alterar fórmulas de cálculo */
+[hidden]{display:none!important}
+.wrap{max-width:820px;margin:26px auto;padding:0 16px 40px}
+.panel{padding:22px;display:flex;flex-direction:column;gap:14px}
+.screen-title{font-size:19px;margin:0 0 2px}
+.calc-section{background:#fff;border:1px solid #e8e5d5;border-radius:13px;padding:18px;min-width:0}
+.calc-section h2{font-size:15px;color:#333;margin:0 0 15px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px}
+.form-grid>.field{margin:0;min-width:0}
+.section-content>.field{margin-bottom:12px}
+.section-content>.field:last-child{margin-bottom:0}
+#packageBox{padding:0;margin:0;border:0}
+#packageBox>label{font-weight:600;margin-bottom:12px;color:#555}
+#packageBox>.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px}
+#packageBox>.grid>.field{margin:0;min-width:0}
+#freteBox>.field{margin-bottom:13px}
+#freteBox>.field:last-child{margin-bottom:0}
+#freteBox>#manualFinal,#freteBox>#manualCheio{margin:10px 0}
+#freteBox .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+#freteBox .grid>.field{min-width:0}
+#freteBox input[readonly]{background:#fffbea}
+.mode{margin-bottom:14px}.mode button{min-height:49px}
+.field label{line-height:1.35}
+.summary{padding:21px 14px}
+.stat{align-items:baseline}.stat strong{text-align:right;white-space:nowrap}
+@media(max-width:580px){.wrap{margin:10px auto;padding:0 10px 24px}.panel{padding:13px;gap:11px}.calc-section{padding:13px}.form-grid,#packageBox>.grid,#freteBox .grid{grid-template-columns:1fr 1fr;gap:12px}.form-grid>.field:nth-child(3){grid-column:1/-1}.mode button{font-size:13px;padding:10px 7px}}
+@media(max-width:390px){.form-grid,#packageBox>.grid,#freteBox .grid{grid-template-columns:1fr}.form-grid>.field:nth-child(3){grid-column:auto}}
+</style><style>
+html{scroll-behavior:smooth}input,select{max-width:100%}.panel,.calc-section{min-width:0}
+#skuResult,#validationMessage{margin-top:8px;line-height:1.5}#validationMessage{border-radius:10px;padding:12px;background:#fff7cc;color:#6c4800;font-size:13px}
+#validationMessage.danger{background:#ffebeb;color:#971c20}
+.comparegrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.comparebox{border:1px solid #e9dfae;border-radius:12px;padding:14px;background:#fffdf3}
+.comparebox strong{font-size:23px;display:block;margin:8px 0}.comparebox span{font-size:12px;color:#555}
+#installApp{width:100%;margin-top:9px;min-height:45px}
+@media(max-width:540px){.comparegrid{grid-template-columns:1fr}.calc-section{padding:14px}.panel{padding:13px}.form-grid,#packageBox>.grid,#freteBox .grid{grid-template-columns:1fr!important}}
+</style><style>
+/* V10: duas colunas independentes SEM fixação/ sobreposição, rolagem da página inteira */
+.wrap{max-width:1120px}
+.main-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:16px;align-items:start}
+.main-layout>.panel{margin:0}
+.main-layout>.panel:first-child{grid-column:1}
+.main-layout>.panel:nth-child(2){grid-column:2;position:static;top:auto;align-self:start}
+.main-layout>*{grid-column:1/-1}.main-layout>.panel:first-child{grid-column:1}.main-layout>.panel:nth-child(2){grid-column:2}
+.calc-section{box-shadow:none}
+#packageBox .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:780px){.main-layout{grid-template-columns:1fr}.main-layout>.panel:first-child,.main-layout>.panel:nth-child(2),.main-layout>.panel:nth-child(3){grid-column:1;position:static}}
+/* V10: reforça que nenhuma coluna fica sobre a outra ao expandir os campos */
+.main-layout>.panel:nth-child(2){position:static!important;inset:auto!important;transform:none!important;z-index:auto!important;}
+.main-layout>.panel{min-width:0;overflow-wrap:break-word;}
+@media(max-width:900px){.main-layout{grid-template-columns:1fr}.main-layout>.panel:first-child,.main-layout>.panel:nth-child(2){grid-column:1}}
+</style><link href="manifest.webmanifest" rel="manifest"/><link href="icons/icon-192.png" rel="icon"/><meta content="#ffe600" name="theme-color"/></head>
+<body><header class="top"><h1>VENEK COMERCIAL <span style="font-weight:400">| Calculadora Mercado Livre</span></h1><p>Preço certo, taxas visíveis e lucro estimado — sem cadastro.</p></header><div class="wrap">
+<main class="main-layout"><div class="panel"><h2 class="screen-title">Calculadora de vendas</h2><section class="calc-section" id="skuArea"><h2>Buscar produto pelo SKU (opcional)</h2><div class="field"><label for="skuSearch">Código do produto no Bling</label><input autocomplete="off" id="skuSearch" list="skuOptions" placeholder="Digite um SKU, ex.: 1031-B"/><datalist id="skuOptions"></datalist><div class="hint" id="skuResult">Catálogo local do Bling. Peso e medidas são cadastrais: confirme os dados da embalagem pronta para envio.</div></div><button id="loadSku" type="button">Preencher dados do SKU</button></section><section class="calc-section"><h2>1. Anúncio e modalidade</h2><div class="form-grid"><div class="field"><label for="anuncio">Tipo de anúncio</label><select id="anuncio"><option value="premium">Premium</option><option value="classico">Clássico</option></select><div class="hint">Selecione o tipo de anúncio. A comissão pode variar conforme a categoria.</div></div><div class="field"><label for="envio">Tipo de envio</label><select id="envio"><option value="coleta" selected>Coleta / Agências</option><option value="full">Full</option><option value="flex">Flex</option></select></div><div class="field"><label for="comissao" id="comissaoLabel">Comissão Premium (%)</label><input id="comissao" inputmode="decimal" value="18"/></div></div></section><section class="calc-section"><h2>2. O que deseja calcular?</h2><div class="mode"><button class="active" id="mManual" type="button">Digitar preço final</button><button id="mSugerir" type="button">Calcular preço sugerido</button></div><div class="form-grid"><div class="field"><label for="custo">Custo do produto (R$) — opcional</label><input id="custo" inputmode="decimal" placeholder="Ex.: 3,50"/></div><div class="field" id="precoBox"><label for="preco">Preço final de venda (R$)</label><input id="preco" inputmode="decimal" placeholder="Ex.: 19,00"/></div><div class="field" hidden="" id="lucroBox"><label for="desejado">Lucro que quero ganhar (R$)</label><input id="desejado" inputmode="decimal" placeholder="Ex.: 5,00"/></div></div></section><section class="calc-section"><h2>3. Peso e medidas da embalagem</h2><div class="section-content"><div class="field" id="packageBox"><label>Embalagem pronta para envio (peso e medidas)</label><div class="grid">
+<div class="field"><label for="peso">Peso total embalado (kg)</label><input id="peso" inputmode="decimal" placeholder="Ex.: 0,250"/></div>
+<div class="field"><label for="comp">Comprimento (cm)</label><input id="comp" inputmode="decimal" placeholder="Ex.: 19"/></div>
+<div class="field"><label for="larg">Largura (cm)</label><input id="larg" inputmode="decimal" placeholder="Ex.: 10"/></div>
+<div class="field"><label for="alt">Altura (cm)</label><input id="alt" inputmode="decimal" placeholder="Ex.: 6"/></div></div>
+<div class="hint" id="pesoResult">Opcional: sem medidas, usamos uma faixa leve de referência (até 300 g).</div></div></div></section><section class="calc-section"><h2>4. Frete e descontos</h2><div class="section-content"><div id="freteBox"><div class="field"><label for="freteTipo">Condição de frete</label>
+<select id="freteTipo"><option value="comprador">Por conta do comprador</option><option value="gratis">Frete grátis para o comprador</option></select></div>
+<div class="field"><label for="freteModo">Como calcular o frete?</label><select id="freteModo"><option value="tabela">Automático (peso e medidas opcionais)</option><option value="final">Digitar custo final mostrado no Mercado Livre</option><option value="cheio">Digitar valor cheio e desconto de reputação</option></select></div>
+<div class="grid" hidden="" id="manualFinal"><div class="field"><label for="freteManual">Valor final que a Venek paga (R$)</label><input id="freteManual" inputmode="decimal" placeholder="Ex.: 6,85"/></div></div>
+<div class="grid" hidden="" id="manualCheio"><div class="field"><label for="freteBase">Frete cheio (R$)</label><input id="freteBase" inputmode="decimal" value="9,79"/></div><div class="field"><label for="descontoFrete">Desconto reputação (%)</label><input id="descontoFrete" inputmode="decimal" value="30"/></div></div>
+<div class="field"><label for="frete">Frete descontado da venda (R$)</label><input id="frete" inputmode="decimal" readonly="" tabindex="-1"/></div>
+<div class="hint" id="freteInfo">Tabela de referência para reputação verde, com desconto já aplicado. O valor pode mudar no anúncio real.</div></div><div class="field" hidden="" id="flexHint"><span class="pill">Flex: custo líquido estimado de R$ 3,00</span><div class="hint">Representa entregador R$ 12,99 menos bônus conservador R$ 9,99. Não somamos bônus e entregador outra vez.</div></div></div></section></div>
+<div class="panel"><h2>2. Resultado</h2>
+<div class="summary"><div id="mainLabel">Preço final informado</div><div class="main" id="mainValue">—</div><div class="hint" id="status">Digite um preço para começar.</div></div>
+<div class="stat"><span id="comissaoResultLabel">Comissão Premium</span><strong id="comOut">—</strong></div>
+<div class="stat"><span>Tarifa fixa Flex</span><strong id="fixOut">—</strong></div>
+<div class="stat"><span id="envioName">Frete debitado pelo ML</span><strong id="freteOut">—</strong></div>
+<div class="stat"><span>Repasse do Mercado Livre</span><strong id="repOut">—</strong></div>
+<div class="stat"><span>Após o custo líquido Flex</span><strong id="saldoOut">—</strong></div>
+<div class="stat"><span>Lucro após produto e despesas</span><strong class="good big" id="lucroOut">—</strong></div>
+<div class="hint" id="costMissing">O lucro aparece somente quando você informa o custo do produto.</div>
+</div><section class="calc-section" id="extrasArea"><h2>Alertas e comparação</h2><div id="validationMessage" role="status">Preencha o preço e o custo para verificar o resultado.</div><details style="margin-top:13px"><summary>Comparar Clássico e Premium</summary><p class="note">Informe a comissão de cada tipo de anúncio. A comparação usa o mesmo preço, modalidade e frete da calculadora acima.</p><div class="grid"><div class="field"><label for="rateClassic">Comissão Clássico (%)</label><input id="rateClassic" inputmode="decimal" placeholder="Informe a taxa real"/></div><div class="field"><label for="ratePremium">Comissão Premium (%)</label><input id="ratePremium" inputmode="decimal" value="18"/></div></div><div class="comparegrid"><div class="comparebox"><span>Repasse Clássico</span><strong id="classicNet">—</strong><span id="classicProfit"></span></div><div class="comparebox"><span>Repasse Premium</span><strong id="premiumNet">—</strong><span id="premiumProfit"></span></div></div></details></section>
+<div class="panel"><details><summary>Despesas opcionais (aluguel, energia, embalagem etc.)</summary>
+<p class="note">Todos os campos são opcionais e começam zerados. Para ratear despesas mensais, informe quantas unidades espera vender no mês. Se deixar tudo em branco, não entra custo adicional.</p>
+<div class="grid">
+<div class="field"><label for="aluguel">Aluguel mensal</label><input id="aluguel" inputmode="decimal" placeholder="0,00"/></div>
+<div class="field"><label for="energia">Energia mensal</label><input id="energia" inputmode="decimal" placeholder="0,00"/></div>
+<div class="field"><label for="agua">Água mensal</label><input id="agua" inputmode="decimal" placeholder="0,00"/></div>
+<div class="field"><label for="pessoal">Funcionários / encargos mensais</label><input id="pessoal" inputmode="decimal" placeholder="0,00"/></div>
+<div class="field"><label for="outros">Outras despesas mensais</label><input id="outros" inputmode="decimal" placeholder="0,00"/></div>
+<div class="field"><label for="qtd">Unidades previstas vendidas no mês</label><input id="qtd" inputmode="numeric" placeholder="Ex.: 200"/></div>
+<div class="field"><label for="embalagem">Embalagem por venda (R$)</label><input id="embalagem" inputmode="decimal" placeholder="0,00"/></div>
+<div class="field"><label for="imposto">Imposto efetivo (%)</label><input id="imposto" inputmode="decimal" placeholder="0"/></div>
+<div class="field"><label for="extra">Outros custos por venda (R$)</label><input id="extra" inputmode="decimal" placeholder="0,00"/></div>
+</div><div class="hint" id="rateioInfo">Rateio: R$ 0,00 por venda</div>
+</details></div>
+<div class="panel"><p class="note"><strong>Importante:</strong> Comissão Premium de 18% e os valores de frete preenchidos são exemplos das vendas que a Venek enviou, não tarifas universais. Confira os percentuais de desconto e o custo cheio em cada anúncio; não são universais. Revise os custos do anúncio real. Flex usa uma tabela indicativa de tarifa fixa: abaixo de R$ 19 = R$ 6,25; R$ 19–48,99 = R$ 6,65; R$ 49–78,99 = R$ 7,75; a partir de R$ 79 = R$ 0. Confirme eventuais mudanças do Mercado Livre. Na estimativa automática Full/Coleta, o desconto de reputação já está incluído. A tabela base por conta do comprador cobre até 2 kg e permite valores aproximados fora da cobertura. O frete automático usa valores de referência, inclusive na ausência de peso. Frete grátis fora do exemplo observado e volumes acima de 2 kg são extrapolações, não custos oficiais: confira o anúncio antes de definir preços. O saldo Flex desconta R$ 3,00 somente uma vez. Repasse é diferente de lucro; não inclui Ads ou despesas não preenchidas.</p></div>
+<section class="panel" id="installArea"><h2>Instalar no celular</h2><p class="note">Depois de publicar em um site HTTPS, você poderá instalar como aplicativo. No Android, use “Instalar app” ou o menu do Chrome. No iPhone, Safari → Compartilhar → Adicionar à Tela de Início.</p><button hidden="" id="installApp" type="button">Instalar aplicativo</button><p class="hint" id="installInfo">O cálculo funciona abrindo o HTML. Para carregar o catálogo por SKU, publique o pacote completo. A instalação na tela inicial requer publicação em HTTPS, como GitHub Pages.</p></section></div></main>
+<script>
+const ids=['anuncio','envio','custo','desejado','preco','comissao','freteBase','descontoFrete','freteModo','freteManual','peso','comp','larg','alt','aluguel','energia','agua','pessoal','outros','qtd','embalagem','imposto','extra'];
+const $=id=>document.getElementById(id);
+let mode='manual';
+const rates={premium:'18',classico:''};
+let currentAnuncio='premium';
+function parse(v){const t=String(v||'').trim().replace(/\s/g,'').replace(/R\$/gi,'');if(!t)return null;const z=t.includes(',')?t.replace(/\./g,'').replace(',','.'):t;const n=Number(z);return Number.isFinite(n)?n:null}
+const num=id=>parse($(id).value);
+const safe=id=>Math.max(0,num(id)??0);
+const money=n=>Number.isFinite(n)?n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'—';
+function fee(p,env){return env==='flex'&&p<79?(p<19?6.25:p<49?6.65:7.75):0}
+// Custos já líquidos para a reputação verde, tabela pública 2026 (somente faixas verificadas).
+const weightLimits=[.3,.5,1,1.5,2];
+const priceLimits=[19,49,79,100,120,150,200,Infinity];
+const shippingTable=[
+[5.65,6.85,8.15,12.95,14.95,16.95,19.05,21.65],
+[5.95,6.95,8.25,13.85,16.15,18.15,20.45,23.25],
+[6.05,7.15,8.45,14.45,16.85,19.05,21.35,24.45],
+[6.15,7.35,8.65,14.75,17.15,19.45,21.75,25.45],
+[6.25,7.45,8.75,15.05,17.65,19.85,22.25,25.55]
+];
+function packageWeight(){const w=num('peso'),l=num('comp'),b=num('larg'),a=num('alt');
+ const vol=(l!==null&&b!==null&&a!==null&&l>0&&b>0&&a>0)?l*b*a/5000:null;
+ const real=w!==null&&w>0?w:null;
+ if(real===null&&vol===null)return null;
+ return {real,volume:vol,bill:Math.max(real||0,vol||0)};
+}
+function freightEstimate(p){
+ const k=packageWeight();
+ // Fallback conservador e transparente: embalagem pequena até 300 g, não frete garantido.
+ const wi=k?weightLimits.findIndex(x=>k.bill<=x):0;
+ const pi=priceLimits.findIndex(x=>p<x);
+ const effectiveWeight=wi<0?weightLimits.length-1:wi;
+ if(pi<0)return null;
+ const comprador=shippingTable[effectiveWeight][pi];
+ if($('freteTipo').value==='comprador')return comprador;
+ // Para frete grátis: âncora observada R$25,90 -> R$12,95 ante R$6,85 no comprador.
+ // Estimativa proporcional, somente para permitir cálculo; NÃO é uma tarifa oficial.
+ if(p>=19&&p<49&&effectiveWeight===0)return 12.95;
+ return Math.ceil(comprador*(12.95/6.85)*100)/100;
+}
+function freight(p){if($('envio').value==='flex')return 0;const m=$('freteModo').value;
+ if(m==='final'){const x=num('freteManual');return x===null||x<0?freightEstimate(p):x}
+ if(m==='cheio'){const b=num('freteBase'),d=num('descontoFrete');return b===null||d===null||d<0||d>100?freightEstimate(p):Math.round(b*(1-d/100)*100)/100}
+ return freightEstimate(p);
+}
+function costs(){const a=['aluguel','energia','agua','pessoal','outros'].reduce((x,id)=>x+safe(id),0),q=safe('qtd');return {rateio:q>0?a/q:0,unrateado:a>0&&q===0,extras:safe('embalagem')+safe('extra'),tax:safe('imposto')/100}}
+function calc(p){const env=$('envio').value,r=safe('comissao')/100,fr=env==='flex'?0:freight(p),fx=fee(p,env),comm=Math.round((p*r+Number.EPSILON)*100)/100,ml=fr===null?null:p-comm-fx-fr,flex=env==='flex'?3:0,c=costs(),final=ml===null?null:ml-flex-c.extras-c.rateio-p*c.tax,cp=num('custo');return {comm,fr,fx,ml,flex,final,profit:cp===null||final===null?null:final-cp}}
+function suggest(){const cp=num('custo'),desired=num('desejado');if(cp===null||desired===null||num('comissao')===null)return null;let best=null;
+// Procurar por faixas e pelo menor preço viável. Não assumir frete constante quando o preço muda.
+const breaks=[0,19,49,79,100,120,150,200];for(let i=0;i<breaks.length;i++){
+ const lo=breaks[i],hi=i+1<breaks.length?breaks[i+1]-.01:Math.max(100000,lo);let left=Math.round(Math.max(.01,lo)*100),right=Math.round(hi*100),candidate=null;
+ if(calc(right/100).profit===null)continue;
+ if(calc(right/100).profit<desired-.00001)continue;
+ while(left<=right){let mid=Math.floor((left+right)/2),result=calc(mid/100);if(result.profit!==null&&result.profit>=desired-.00001){candidate=mid;right=mid-1}else left=mid+1}
+ if(candidate!==null&&(best===null||candidate<best))best=candidate;
+}return best===null?null:best/100}
+function update(){const env=$('envio').value,isFlex=env==='flex',fw=$('freteModo').value,k=packageWeight();
+ $('packageBox').hidden=isFlex;$('freteBox').hidden=isFlex;$('flexHint').hidden=!isFlex;
+ $('manualFinal').hidden=fw!=='final';$('manualCheio').hidden=fw!=='cheio';
+ $('pesoResult').textContent=k?`Peso real: ${k.real.toFixed(3)} kg • peso volumétrico: ${k.volume.toFixed(3)} kg • peso considerado: ${k.bill.toFixed(3)} kg`:'Medidas opcionais: usando frete de referência para embalagem leve (até 300 g).';
+ const nome=$('anuncio').value==='premium'?'Premium':'Clássico';$('comissaoLabel').textContent='Comissão '+nome+' (%)';$('comissaoResultLabel').textContent='Comissão '+nome;
+ $('precoBox').hidden=mode!=='manual';$('lucroBox').hidden=mode!=='suggest';$('mManual').classList.toggle('active',mode==='manual');$('mSugerir').classList.toggle('active',mode==='suggest');
+ const price=mode==='manual'?num('preco'):suggest(),c=costs();$('rateioInfo').textContent=`Rateio: ${money(c.rateio)} por venda`+(c.unrateado?' — informe a quantidade vendida para ativar':'');
+ $('mainLabel').textContent=mode==='manual'?'Preço final informado':'Preço sugerido para vender';
+ for(const id of ['comOut','fixOut','freteOut','repOut','saldoOut','lucroOut'])$(id).textContent='—';
+ $('envioName').textContent=isFlex?'Custo entregador Flex (líquido estimado)':'Frete descontado pelo ML';
+ if(num('comissao')===null||num('comissao')<0){$('mainValue').textContent='—';$('status').textContent='Informe a comissão da categoria do anúncio.';return}
+ if(price===null||price<=0){$('mainValue').textContent='—';$('frete').value='';$('status').textContent=mode==='manual'?'Digite um preço final para começar.':'Informe custo do produto e lucro desejado.';return}
+ const a=calc(price);$('mainValue').textContent=money(price);$('frete').value=a.fr===null?'':a.fr.toFixed(2).replace('.',',');
+ if(a.fr===null){$('status').textContent=fw==='tabela'?'Não foi possível estimar este frete. Informe o valor do anúncio.':'Usando frete automático de referência até você preencher um valor manual.';$('costMissing').textContent='Informe o custo do frete no campo manual para obter o repasse.';return}
+ $('freteInfo').textContent=fw==='tabela'?'Frete estimado para cálculo rápido; sem peso usamos até 300 g. Para pacote acima de 2 kg usamos a última faixa disponível; confira o custo real no ML. No frete grátis, valores não validados são aproximações.':fw==='final'?'Valor informado diretamente, sem aplicar outro desconto.':'Custo calculado sobre valor cheio com desconto digitado.';
+ $('status').textContent=mode==='manual'?'Simulação de preço digitado':'Menor preço estimado para a meta de lucro';
+ $('comOut').textContent='− '+money(a.comm);$('fixOut').textContent='− '+money(a.fx);$('freteOut').textContent='− '+money(isFlex?3:a.fr);$('repOut').textContent=money(a.ml);
+ $('saldoOut').textContent=money(a.ml-a.flex);$('lucroOut').textContent=money(a.profit);$('costMissing').textContent=a.profit===null?'Sem custo do produto: mostramos o repasse, não o lucro.':'Lucro desconta produto, custo líquido Flex, despesas preenchidas e impostos.';
+ $('lucroOut').className='big '+(a.profit!==null&&a.profit<0?'warn':'good');
+}
+$('mManual').onclick=()=>{mode='manual';update()};$('mSugerir').onclick=()=>{mode='suggest';update()};
+ids.filter(id=>id!=='anuncio').forEach(id=>$(id).addEventListener('input',update));
+$('preco').addEventListener('input',()=>{if(mode!=='manual'){mode='manual';update()}});
+$('anuncio').addEventListener('change',()=>{rates[currentAnuncio]=$('comissao').value;currentAnuncio=$('anuncio').value;$('comissao').value=rates[currentAnuncio];update()});
+$('freteTipo').addEventListener('change',()=>{const free=$('freteTipo').value==='gratis';if($('freteModo').value==='cheio'){$('freteBase').value=free?'25,90':'9,79';$('descontoFrete').value=free?'50':'30';}update()});
+$('envio').addEventListener('change',update);$('freteModo').addEventListener('change',update);update();
+</script><script>
+(()=>{
+'use strict';
+const get=id=>document.getElementById(id), fields=['anuncio','envio','comissao','freteTipo','freteModo','freteManual','freteBase','descontoFrete','peso','comp','larg','alt','aluguel','energia','agua','pessoal','outros','qtd','embalagem','imposto','extra','rateClassic','ratePremium'];
+let catalog=[];
+const decimal=v=>{let x=String(v??'').trim();if(!x)return null;x=x.includes(',')?x.replace(/\./g,'').replace(',','.'):x;const n=Number(x);return Number.isFinite(n)?n:null};
+const money2=n=>Number.isFinite(n)?n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'—';
+const setCurrency=(id,v)=>{get(id).value=String(v).replace('.',',')};
+function saved(){try{return JSON.parse(localStorage.getItem('venek-ml-config-v6')||'{}')}catch{return {}}}
+function persist(){const o={};fields.forEach(id=>{if(id!=='envio'&&get(id))o[id]=get(id).value});try{localStorage.setItem('venek-ml-config-v6',JSON.stringify(o))}catch{}}
+function loadSaved(){const o=saved();if(!Object.keys(o).length)return;fields.forEach(id=>{if(id!=='envio'&&get(id)&&Object.hasOwn(o,id))get(id).value=o[id]});
+if(typeof currentAnuncio!=='undefined'&&typeof rates!=='undefined'){
+currentAnuncio=get('anuncio').value;rates[currentAnuncio]=get('comissao').value;
+if(o.rateClassic)rates.classico=o.rateClassic;if(o.ratePremium)rates.premium=o.ratePremium;
+}}
+function updateExtras(){const p=mode==='manual'?num('preco'):suggest(),cost=num('custo'),alert=get('validationMessage');
+if(!Number.isFinite(p)||p<=0){alert.textContent='Informe um preço de venda ou calcule um preço sugerido.';alert.className='';return;}
+const current=calc(p);
+if(current.ml===null){alert.textContent='Não foi possível calcular o frete. Informe o custo mostrado no anúncio.';alert.className='danger';}
+else if(cost===null){alert.textContent='Repasse estimado disponível. Informe o custo do produto para calcular lucro e verificar prejuízo.';alert.className='';}
+else if(current.profit<0){alert.textContent='ATENÇÃO: PREJUÍZO estimado de '+money2(-current.profit)+'. Reveja preço, comissão e frete.';alert.className='danger';}
+else if(current.profit<0.01){alert.textContent='ATENÇÃO: venda sem lucro estimado. Reveja a precificação.';alert.className='danger';}
+else{alert.textContent='Lucro estimado de '+money2(current.profit)+', após os custos informados.';alert.className='';}
+const activeRate=get('comissao').value,an=get('anuncio').value;
+for(const [kind,input,netId,profitId] of [['classico','rateClassic','classicNet','classicProfit'],['premium','ratePremium','premiumNet','premiumProfit']]){
+ const rate=decimal(get(input).value);if(rate===null||rate<0||rate>=100){get(netId).textContent='Informe a comissão';get(profitId).textContent='';continue}
+ get('comissao').value=String(rate).replace('.',',');const c=calc(p);
+ get(netId).textContent=c.ml===null?'Frete não definido':money2(c.ml);
+ get(profitId).textContent=c.profit===null?'Custo do produto não informado':'Lucro estimado: '+money2(c.profit);
+}
+get('comissao').value=activeRate;
+}
+function refresh(){update();updateExtras();persist()}
+function applyProduct(p){get('skuResult').textContent=p.name+' — SKU '+p.sku;
+const assign=(id,value)=>{if(value>0)setCurrency(id,value)};
+assign('peso',p.weight);assign('comp',p.length);assign('larg',p.width);assign('alt',p.height);
+get('skuResult').textContent+=' | Informe o custo manualmente; preços de custo não são publicados.';
+get('skuResult').textContent+=' Confirme o peso e as dimensões da embalagem final.';
+refresh();}
+function chooseSku(){const x=get('skuSearch').value.trim().toLowerCase();const match=catalog.find(p=>p.sku.toLowerCase()===x);if(match)applyProduct(match);else get('skuResult').textContent='SKU não localizado. Confira o código digitado.';}
+get('loadSku').addEventListener('click',chooseSku);
+get('skuSearch').addEventListener('change',()=>{const x=get('skuSearch').value.trim().toLowerCase();if(catalog.some(p=>p.sku.toLowerCase()===x))chooseSku()});
+const sameUrl='catalogo.json';fetch(sameUrl).then(r=>{if(!r.ok)throw Error('sem catálogo');return r.json()}).then(a=>{catalog=a;const opts=get('skuOptions');a.forEach(p=>{const opt=document.createElement('option');opt.value=p.sku;opt.label=p.name;opts.append(opt)});get('skuResult').textContent=`${a.length} SKUs disponíveis. Digite e clique em preencher.`}).catch(()=>get('skuResult').textContent='Para buscar SKUs, abra o app pelo site publicado ou por um servidor local. Ao abrir apenas o arquivo HTML, o navegador pode bloquear a leitura do catálogo.');
+loadSaved();
+if((get('freteModo').value==='final'&&!get('freteManual').value.trim())||(get('freteModo').value==='cheio'&&(!get('freteBase').value.trim()||!get('descontoFrete').value.trim()))){get('freteModo').value='tabela'}
+// Modalidade inicial fixa: configuracoes antigas nunca devem selecionar Full ou Flex.
+get('envio').value='coleta';
+get('ratePremium').addEventListener('input',()=>{rates.premium=get('ratePremium').value;refresh()});
+get('rateClassic').addEventListener('input',()=>{rates.classico=get('rateClassic').value;refresh()});
+get('anuncio').addEventListener('change',()=>{get('comissao').value=get('anuncio').value==='premium'?get('ratePremium').value:get('rateClassic').value;refresh()});
+get('comissao').addEventListener('input',()=>{if(get('anuncio').value==='premium')get('ratePremium').value=get('comissao').value;else get('rateClassic').value=get('comissao').value;refresh()});
+fields.forEach(id=>{const el=get(id);if(el&&!['anuncio','comissao','ratePremium','rateClassic'].includes(id)){el.addEventListener('input',()=>{updateExtras();persist()});el.addEventListener('change',()=>{updateExtras();persist()})}});
+['custo','preco','desejado'].forEach(id=>get(id).addEventListener('input',updateExtras));
+get('mManual').addEventListener('click',updateExtras);get('mSugerir').addEventListener('click',updateExtras);
+update();updateExtras();
+// Restauracao de formulario pelo navegador pode ocorrer apos carregar a pagina.
+window.addEventListener('pageshow',()=>{get('envio').value='coleta';update();updateExtras()});
+let deferred=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;get('installApp').hidden=false});
+get('installApp').addEventListener('click',async()=>{if(!deferred)return;deferred.prompt();await deferred.userChoice;deferred=null;get('installApp').hidden=true});
+if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
+})();
+</script></body></html>
