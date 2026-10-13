@@ -1,0 +1,17 @@
+{
+  "name": "VENEK | Calculadora Mercado Livre",
+  "short_name": "Venek ML",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fffbea",
+  "theme_color": "#ffe600",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
